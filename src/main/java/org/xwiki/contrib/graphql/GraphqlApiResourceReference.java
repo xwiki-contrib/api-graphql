@@ -20,6 +20,7 @@
 package org.xwiki.contrib.graphql;
 
 import org.xwiki.resource.AbstractResourceReference;
+import org.xwiki.resource.ResourceType;
 
 /**
  * Empty resource reference for Graphql.
@@ -28,4 +29,13 @@ import org.xwiki.resource.AbstractResourceReference;
  */
 public class GraphqlApiResourceReference extends AbstractResourceReference
 {
+    /**
+     * Represents an GraphQL Resource Type.
+     */
+    private static final ResourceType TYPE = new ResourceType("graphql");
+
+    public GraphqlApiResourceReference()
+    {
+        setType(TYPE);
+    }
 }
