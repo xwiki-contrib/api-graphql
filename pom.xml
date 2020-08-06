@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+ <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ 
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.xwiki.contrib</groupId>
+    <artifactId>parent-platform</artifactId>
+    <version>12.4</version>
+  </parent>
+  <groupId>org.xwiki.contrib.graphql</groupId>
+  <artifactId>api-graphql</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <name>XWiki GraphQL API</name>
+  <description>GraphQL API to expose the XWiki model for usecases where REST is too verbose or produces too much back and forward between the client and the server.</description>
+
+  <developers>
+    <developer>
+      <id>Enygma2002</id>
+      <name>Eduard Moraru</name>
+    </developer>
+  </developers>
+
+  <properties>
+    <smallrye-graphql.version>1.0.6</smallrye-graphql.version>
+  </properties>
+
+
+  <dependencies>
+    <!-- GraphQL -->
+    <dependency>
+      <groupId>io.smallrye</groupId>
+      <artifactId>smallrye-graphql-servlet</artifactId>
+      <version>${smallrye-graphql.version}</version>
+      <exclusions>
+        <!-- FIXME: Something in XWiki is bringing antlr4-runtime-4.5.1-1.jar as a core extension, but graphql-java requires 
+          4.7.2 so we should fix the XWiki dependency instead of excluding here and risking to hit a feature of the new version that 
+          is really needed. -->
+        <exclusion>
+          <groupId>org.antlr</groupId>
+          <artifactId>antlr4-runtime</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!-- GraphQL UI -->
+    <dependency>
+      <groupId>io.smallrye</groupId>
+      <artifactId>smallrye-graphql-ui-graphiql</artifactId>
+      <version>${smallrye-graphql.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.xwiki.commons</groupId>
+      <artifactId>xwiki-commons-component-default</artifactId>
+      <version>${commons.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-platform-oldcore</artifactId>
+      <version>${platform.version}</version>
+    </dependency>
+  </dependencies>
+
+</project>
