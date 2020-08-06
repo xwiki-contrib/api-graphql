@@ -45,6 +45,7 @@
     <smallrye-graphql.version>1.0.6</smallrye-graphql.version>
     <!-- The server should only be installed at farm level so it can handle the URLs -->
     <xwiki.extension.namespaces>{root}</xwiki.extension.namespaces>
+    <xwiki.checkstyle.skip>true</xwiki.checkstyle.skip>
   </properties>
 
 

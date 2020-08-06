@@ -23,11 +23,13 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.json.JsonObject;
 
 import org.jboss.jandex.Index;
 import org.jboss.jandex.Indexer;
 import org.slf4j.Logger;
+import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.graphql.Graphql;
 
 import graphql.schema.GraphQLSchema;
@@ -40,6 +42,8 @@ import io.smallrye.graphql.schema.model.Schema;
 /**
  * @version $Id$
  */
+@Component
+@Singleton
 public class DefaultGraphql implements Graphql
 {
 
