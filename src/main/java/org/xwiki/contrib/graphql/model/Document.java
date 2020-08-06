@@ -34,4 +34,9 @@ public class Document
         this.documentReference = documentReference;
     }
 
+    public String getDocumentReference()
+    {
+        return this.documentReference;
+    }
+
 }
