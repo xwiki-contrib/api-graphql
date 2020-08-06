@@ -19,9 +19,12 @@
  */
 package org.xwiki.contrib.graphql.model;
 
+import org.eclipse.microprofile.graphql.Type;
+
 /**
  * @version $Id$
  */
+@Type
 public class Document
 {
     private String documentReference;

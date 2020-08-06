@@ -66,6 +66,9 @@ public class DefaultGraphql implements Graphql
         InputStream stream =
             getClass().getClassLoader().getResourceAsStream("org/xwiki/contrib/graphql/GraphqlApi.class");
         indexer.index(stream);
+        stream =
+            getClass().getClassLoader().getResourceAsStream("org/xwiki/contrib/graphql/model/Document.class");
+        indexer.index(stream);
         Index index = indexer.complete();
 
         Schema schema = SchemaBuilder.build(index); // Get the smallrye schema
