@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.contrib.graphql;
+package org.xwiki.contrib.graphql.internal;
 
 import java.util.List;
 import java.util.Map;
@@ -44,11 +44,14 @@ public class GraphqlApiResourceReferenceResolver extends AbstractResourceReferen
     public GraphqlApiResourceReference resolve(ExtendedURL representation, ResourceType resourceType,
         Map<String, Object> parameters) throws CreateResourceReferenceException, UnsupportedResourceReferenceException
     {
-        List<String> segments = representation.getSegments();
         GraphqlApiResourceReference resourceReference = new GraphqlApiResourceReference();
+
+        // Mark it as a schema request
+        List<String> segments = representation.getSegments();
         if (!segments.isEmpty() && "graphql.schema".equals(segments.get(0))) {
             resourceReference.setDisplaySchema(true);
         }
+
         return resourceReference;
     }
 }

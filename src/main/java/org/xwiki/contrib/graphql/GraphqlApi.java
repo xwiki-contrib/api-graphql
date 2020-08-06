@@ -33,7 +33,7 @@ import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.web.Utils;
 
 /**
- * The entry-point for the GraphQL API.
+ * The entry-point for the operations provided by the XWiki GraphQL API.
  *
  * @version $Id$
  */

@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.contrib.graphql;
+package org.xwiki.contrib.graphql.internal;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -42,21 +42,20 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.container.Container;
 import org.xwiki.container.servlet.ServletRequest;
 import org.xwiki.container.servlet.ServletResponse;
+import org.xwiki.contrib.graphql.Graphql;
 import org.xwiki.resource.AbstractResourceReferenceHandler;
 import org.xwiki.resource.ResourceReference;
 import org.xwiki.resource.ResourceReferenceHandlerChain;
 import org.xwiki.resource.ResourceReferenceHandlerException;
 import org.xwiki.resource.ResourceType;
 
-import graphql.schema.GraphQLSchema;
-
 /**
- * XWiki GraphQL endpoint.
- * Most of this code inspired by smallrye-graphql-servlet implementation.
+ * XWiki GraphQL endpoint. Most of this code inspired by smallrye-graphql-servlet implementation.
  *
  * @version $Id$
  * @since 1.0
@@ -66,12 +65,14 @@ import graphql.schema.GraphQLSchema;
 @Named("graphql")
 public class GraphqlApiResourceReferenceHandler extends AbstractResourceReferenceHandler<ResourceType>
 {
-    private static final ResourceType TYPE = new ResourceType("graphql");
     private static final String APPLICATION_JSON_UTF8 = "application/json;charset=UTF-8";
 
     private static final String QUERY = "query";
+
     private static final String VARIABLES = "variables";
+
     private static final JsonReaderFactory jsonReaderFactory = Json.createReaderFactory(null);
+
     private static final JsonWriterFactory jsonWriterFactory = Json.createWriterFactory(null);
 
     @Inject
@@ -83,7 +84,7 @@ public class GraphqlApiResourceReferenceHandler extends AbstractResourceReferenc
     @Override
     public List<ResourceType> getSupportedResourceReferences()
     {
-        return Collections.singletonList(TYPE);
+        return Collections.singletonList(GraphqlApiResourceReference.TYPE);
     }
 
     @Override
@@ -95,15 +96,15 @@ public class GraphqlApiResourceReferenceHandler extends AbstractResourceReferenc
         HttpServletResponse response = ((ServletResponse) this.container.getResponse()).getHttpServletResponse();
 
         try {
-        if (graphqlApiResourceReference.isDisplaySchema()) {
-            getSchema(request, response);
-        } else {
-            if (isGet(request)) {
-                handleGet(request, response);
+            if (graphqlApiResourceReference.isDisplaySchema()) {
+                getSchema(request, response);
             } else {
-                handlePost(request, response);
+                if (isGet(request)) {
+                    handleGet(request, response);
+                } else {
+                    handlePost(request, response);
+                }
             }
-        }
         } catch (Exception e) {
             throw new ResourceReferenceHandlerException("Error while handling GraphQL request.", e);
         }
@@ -120,6 +121,7 @@ public class GraphqlApiResourceReferenceHandler extends AbstractResourceReferenc
 
     /**
      * Ensure that the request method is a GET.
+     *
      * @param request the request to test
      * @return {@code true} iff the method of the request is GET.
      */
@@ -133,9 +135,13 @@ public class GraphqlApiResourceReferenceHandler extends AbstractResourceReferenc
         String query = request.getParameter(QUERY);
         String variables = request.getParameter(VARIABLES);
 
+        if (StringUtils.isBlank(query)) {
+            throw new IllegalArgumentException("Missing mandatory 'query' parameter");
+        }
+
         JsonObjectBuilder input = Json.createObjectBuilder();
         input.add(QUERY, URLDecoder.decode(query, "UTF8"));
-        if (variables != null && !variables.isEmpty()) {
+        if (StringUtils.isNotBlank(variables)) {
             JsonObject jsonObject = toJsonObject(URLDecoder.decode(variables, "UTF8"));
             input.add(VARIABLES, jsonObject);
         }
@@ -157,7 +163,8 @@ public class GraphqlApiResourceReferenceHandler extends AbstractResourceReferenc
         }
     }
 
-    private void handleInput(JsonObject jsonInput, HttpServletResponse response) throws IOException {
+    private void handleInput(JsonObject jsonInput, HttpServletResponse response) throws IOException
+    {
         JsonObject outputJson = graphql.execute(jsonInput);
         if (outputJson != null) {
             ServletOutputStream out = response.getOutputStream();
@@ -170,7 +177,8 @@ public class GraphqlApiResourceReferenceHandler extends AbstractResourceReferenc
         }
     }
 
-    private static JsonObject toJsonObject(String jsonString) {
+    private static JsonObject toJsonObject(String jsonString)
+    {
         if (jsonString == null || jsonString.isEmpty()) {
             return null;
         }

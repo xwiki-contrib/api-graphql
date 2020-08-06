@@ -25,23 +25,23 @@ import javax.json.JsonObject;
 
 import org.xwiki.component.annotation.Role;
 
-import graphql.schema.GraphQLSchema;
-
 /**
+ * Component in charge of initializing and executing GraphQL queries
+ *
  * @version $Id$
  */
 @Role
 public interface Graphql
 {
     /**
-     * @return
+     * @return the schema describing the GraphQL API
      */
     String printSchema() throws IOException;
 
     /**
-     * @param jsonInput
-     * @return
-     * @throws Exception
+     * @param jsonInput the json query
+     * @return the json output
+     * @throws IOException if case of problems
      */
     JsonObject execute(JsonObject jsonInput) throws IOException;
 }

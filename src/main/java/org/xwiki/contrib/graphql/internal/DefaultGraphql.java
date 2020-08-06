@@ -22,13 +22,11 @@ package org.xwiki.contrib.graphql.internal;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.json.JsonObject;
 
 import org.jboss.jandex.Index;
 import org.jboss.jandex.Indexer;
-import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.graphql.Graphql;
 
@@ -41,39 +39,52 @@ import io.smallrye.graphql.schema.SchemaBuilder;
 import io.smallrye.graphql.schema.model.Schema;
 
 /**
+ * Default implementation for {@link Graphql}.
+ *
  * @version $Id$
  */
 @Component
 @Singleton
 public class DefaultGraphql implements Graphql
 {
-
-    @Inject
-    private Logger logger;
+    private class XWikiGraphqlConfig implements Config
+    {
+        // Use defaults.
+    }
 
     private Config getConfiguration()
     {
-        Config config = new Config()
-        {
-        };
-        return config;
+        // Default configuration.
+        return new XWikiGraphqlConfig();
     }
 
     private GraphQLSchema getSchema() throws IOException
     {
-        // Classes in this artifact
+        // Read the classpath and index the classes providing domain and operations.
+        Index index = buildIndex();
+
+        // Read the indexed classes to build the smallrye schema.
+        Schema schema = SchemaBuilder.build(index);
+
+        // Build the actual GraphQLSchema.
+        return Bootstrap.bootstrap(schema, getConfiguration());
+    }
+
+    private Index buildIndex() throws IOException
+    {
         Indexer indexer = new Indexer();
+
+        // FIXME: Come up with a way to automatically discover from the classpath the domain that is used to build the
+        // schema. For now, we are adding them by hand.
+
         InputStream stream =
             getClass().getClassLoader().getResourceAsStream("org/xwiki/contrib/graphql/GraphqlApi.class");
         indexer.index(stream);
-        stream =
-            getClass().getClassLoader().getResourceAsStream("com/xpn/xwiki/api/Document.class");
+
+        stream = getClass().getClassLoader().getResourceAsStream("com/xpn/xwiki/api/Document.class");
         indexer.index(stream);
-        Index index = indexer.complete();
 
-        Schema schema = SchemaBuilder.build(index); // Get the smallrye schema
-
-        return Bootstrap.bootstrap(schema, getConfiguration());
+        return indexer.complete();
     }
 
     @Override
@@ -86,10 +97,6 @@ public class DefaultGraphql implements Graphql
     @Override
     public JsonObject execute(JsonObject jsonInput) throws IOException
     {
-        // if (config.isMetricsEnabled()) {
-        // MetricRegistry vendorRegistry = MetricsService.load().getMetricRegistry(MetricRegistry.Type.VENDOR);
-        // Bootstrap.registerMetrics(schema, vendorRegistry);
-        // }
         ExecutionService executionService = new ExecutionService(getConfiguration(), getSchema());
 
         return executionService.execute(jsonInput);

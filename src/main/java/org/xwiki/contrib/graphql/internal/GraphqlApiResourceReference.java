@@ -17,13 +17,13 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.contrib.graphql;
+package org.xwiki.contrib.graphql.internal;
 
 import org.xwiki.resource.AbstractResourceReference;
 import org.xwiki.resource.ResourceType;
 
 /**
- * Empty resource reference for Graphql.
+ * Resource reference for the GraphQL endpoint.
  *
  * @version $Id$
  */
@@ -32,7 +32,7 @@ public class GraphqlApiResourceReference extends AbstractResourceReference
     /**
      * Represents an GraphQL Resource Type.
      */
-    private static final ResourceType TYPE = new ResourceType("graphql");
+    public static final ResourceType TYPE = new ResourceType("graphql");
 
     private boolean displaySchema;
 
@@ -41,6 +41,9 @@ public class GraphqlApiResourceReference extends AbstractResourceReference
         setType(TYPE);
     }
 
+    /**
+     * @return true if this is a schema request and not an actual query
+     */
     public boolean isDisplaySchema()
     {
         return displaySchema;
