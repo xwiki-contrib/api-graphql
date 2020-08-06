@@ -41,9 +41,9 @@ import com.xpn.xwiki.XWikiContext;
  * @version $Id$
  */
 @GraphQLApi
-@Component(roles = GraphqlApiEndpoint.class)
+@Component(roles = GraphqlApi.class)
 @Singleton
-public class GraphqlApiEndpoint implements Initializable
+public class GraphqlApi implements Initializable
 {
     @Inject
     private Provider<XWikiContext> contextProvider;

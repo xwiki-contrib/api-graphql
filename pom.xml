@@ -50,7 +50,7 @@
     <!-- GraphQL -->
     <dependency>
       <groupId>io.smallrye</groupId>
-      <artifactId>smallrye-graphql-servlet</artifactId>
+      <artifactId>smallrye-graphql</artifactId>
       <version>${smallrye-graphql.version}</version>
       <exclusions>
         <!-- FIXME: Something in XWiki is bringing antlr4-runtime-4.5.1-1.jar as a core extension, but graphql-java requires 
@@ -63,7 +63,7 @@
       </exclusions>
     </dependency>
 
-    <!-- GraphQL UI -->
+    <!-- GraphiQL UI -->
     <dependency>
       <groupId>io.smallrye</groupId>
       <artifactId>smallrye-graphql-ui-graphiql</artifactId>

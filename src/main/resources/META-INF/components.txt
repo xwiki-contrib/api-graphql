@@ -1,1 +1,1 @@
-org.xwiki.contrib.graphql.GraphqlApiEndpoint
+org.xwiki.contrib.graphql.GraphqlApi
