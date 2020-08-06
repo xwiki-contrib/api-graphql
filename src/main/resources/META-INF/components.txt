@@ -1,1 +1,2 @@
 org.xwiki.contrib.graphql.GraphqlApi
+org.xwiki.contrib.graphql.GraphqlApiResourceReferenceHandler
