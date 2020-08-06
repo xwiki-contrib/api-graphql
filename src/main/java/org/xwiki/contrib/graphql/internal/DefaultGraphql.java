@@ -67,7 +67,7 @@ public class DefaultGraphql implements Graphql
             getClass().getClassLoader().getResourceAsStream("org/xwiki/contrib/graphql/GraphqlApi.class");
         indexer.index(stream);
         stream =
-            getClass().getClassLoader().getResourceAsStream("org/xwiki/contrib/graphql/model/Document.class");
+            getClass().getClassLoader().getResourceAsStream("com/xpn/xwiki/api/Document.class");
         indexer.index(stream);
         Index index = indexer.complete();
 

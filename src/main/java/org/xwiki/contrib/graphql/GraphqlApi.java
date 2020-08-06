@@ -19,21 +19,18 @@
  */
 package org.xwiki.contrib.graphql;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.eclipse.microprofile.graphql.Description;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Name;
 import org.eclipse.microprofile.graphql.Query;
-import org.slf4j.Logger;
+import org.xwiki.bridge.DocumentAccessBridge;
 import org.xwiki.component.annotation.Component;
-import org.xwiki.component.phase.Initializable;
-import org.xwiki.component.phase.InitializationException;
-import org.xwiki.contrib.graphql.model.Document;
 
-import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.api.Document;
+import com.xpn.xwiki.doc.XWikiDocument;
+import com.xpn.xwiki.web.Utils;
 
 /**
  * The entry-point for the GraphQL API.
@@ -43,30 +40,18 @@ import com.xpn.xwiki.XWikiContext;
 @GraphQLApi
 @Component(roles = GraphqlApi.class)
 @Singleton
-public class GraphqlApi implements Initializable
+public class GraphqlApi
 {
-    @Inject
-    private Provider<XWikiContext> contextProvider;
-
-    @Inject
-    private Logger logger;
-
     /**
      * @param documentReference the reference
      * @return the document
      */
     @Query
     @Description("Get a document by reference")
-    public Document getDocument(@Name("documentReference") String documentReference)
+    public Document getDocument(@Name("documentReference") String documentReference) throws Exception
     {
-        // XWikiContext context = contextProvider.get();
-        // return personDB.getPerson(personId);
-        return new Document(documentReference);
-    }
-
-    @Override
-    public void initialize() throws InitializationException
-    {
-        logger.info("{} initialized", this.getClass());
+        // Ugly hack but inject doesn't seem to work.
+        DocumentAccessBridge documentAccessBridge = Utils.getComponent(DocumentAccessBridge.class);
+        return new Document((XWikiDocument) documentAccessBridge.getDocument(documentReference), Utils.getContext());
     }
 }
