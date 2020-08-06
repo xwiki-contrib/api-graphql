@@ -1,2 +1,6 @@
 org.xwiki.contrib.graphql.GraphqlApi
+<<<<<<< Updated upstream
 org.xwiki.contrib.graphql.GraphqlApiResourceReferenceHandler
+=======
+org.xwiki.contrib.graphql.GraphqlApiInitializer
+>>>>>>> Stashed changes

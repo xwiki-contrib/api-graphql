@@ -31,7 +31,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.json.Json;
+import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonReader;
 import javax.json.JsonReaderFactory;
 import javax.json.JsonWriter;
 import javax.json.JsonWriterFactory;
@@ -48,11 +50,6 @@ import org.xwiki.resource.ResourceReference;
 import org.xwiki.resource.ResourceReferenceHandlerChain;
 import org.xwiki.resource.ResourceReferenceHandlerException;
 import org.xwiki.resource.ResourceType;
-
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-
-import io.smallrye.graphql.execution.ExecutionService;
 
 /**
  * XWiki GraphQL endpoint.
@@ -78,7 +75,7 @@ public class GraphqlApiResourceReferenceHandler extends AbstractResourceReferenc
     private Container container;
 
     @Inject
-    ExecutionService executionService;
+    private Graphql graphql;
 
     @Override
     public List<ResourceType> getSupportedResourceReferences()
@@ -144,7 +141,7 @@ public class GraphqlApiResourceReferenceHandler extends AbstractResourceReferenc
     }
 
     private void handleInput(JsonObject jsonInput, HttpServletResponse response) throws IOException {
-        JsonObject outputJson = executionService.execute(jsonInput);
+        JsonObject outputJson = graphql.execute(jsonInput);
         if (outputJson != null) {
             ServletOutputStream out = response.getOutputStream();
             response.setContentType(APPLICATION_JSON_UTF8);
