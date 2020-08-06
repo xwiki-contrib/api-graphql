@@ -19,6 +19,7 @@
  */
 package org.xwiki.contrib.graphql;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Named;
@@ -43,6 +44,11 @@ public class GraphqlApiResourceReferenceResolver extends AbstractResourceReferen
     public GraphqlApiResourceReference resolve(ExtendedURL representation, ResourceType resourceType,
         Map<String, Object> parameters) throws CreateResourceReferenceException, UnsupportedResourceReferenceException
     {
-        return new GraphqlApiResourceReference();
+        List<String> segments = representation.getSegments();
+        GraphqlApiResourceReference resourceReference = new GraphqlApiResourceReference();
+        if (!segments.isEmpty() && "graphql.schema".equals(segments.get(0))) {
+            resourceReference.setDisplaySchema(true);
+        }
+        return resourceReference;
     }
 }

@@ -26,6 +26,8 @@ public class Document
 {
     private String documentReference;
 
+    private static final int OTHER_CONSTANT = 42;
+
     /**
      * @param documentReference
      */
@@ -39,4 +41,14 @@ public class Document
         return this.documentReference;
     }
 
+    public String getConstant()
+    {
+        return "CONSTANT";
+    }
+
+    @Override
+    public String toString()
+    {
+        return "GraphQL Model Document: " + this.documentReference;
+    }
 }

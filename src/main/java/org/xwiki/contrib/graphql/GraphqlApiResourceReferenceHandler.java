@@ -21,6 +21,7 @@ package org.xwiki.contrib.graphql;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URLDecoder;
@@ -50,6 +51,8 @@ import org.xwiki.resource.ResourceReference;
 import org.xwiki.resource.ResourceReferenceHandlerChain;
 import org.xwiki.resource.ResourceReferenceHandlerException;
 import org.xwiki.resource.ResourceType;
+
+import graphql.schema.GraphQLSchema;
 
 /**
  * XWiki GraphQL endpoint.
@@ -87,17 +90,31 @@ public class GraphqlApiResourceReferenceHandler extends AbstractResourceReferenc
     public void handle(ResourceReference reference, ResourceReferenceHandlerChain chain)
         throws ResourceReferenceHandlerException
     {
+        GraphqlApiResourceReference graphqlApiResourceReference = (GraphqlApiResourceReference) reference;
         HttpServletRequest request = ((ServletRequest) this.container.getRequest()).getHttpServletRequest();
         HttpServletResponse response = ((ServletResponse) this.container.getResponse()).getHttpServletResponse();
 
         try {
+        if (graphqlApiResourceReference.isDisplaySchema()) {
+            getSchema(request, response);
+        } else {
             if (isGet(request)) {
                 handleGet(request, response);
             } else {
                 handlePost(request, response);
             }
+        }
         } catch (Exception e) {
             throw new ResourceReferenceHandlerException("Error while handling GraphQL request.", e);
+        }
+    }
+
+    protected void getSchema(HttpServletRequest request, HttpServletResponse response) throws IOException
+    {
+        response.setContentType("text/plain");
+        try (PrintWriter out = response.getWriter()) {
+            out.print(graphql.printSchema());
+            out.flush();
         }
     }
 

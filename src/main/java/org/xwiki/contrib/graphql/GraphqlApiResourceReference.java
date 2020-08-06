@@ -34,8 +34,21 @@ public class GraphqlApiResourceReference extends AbstractResourceReference
      */
     private static final ResourceType TYPE = new ResourceType("graphql");
 
+    private boolean displaySchema;
+
     public GraphqlApiResourceReference()
     {
         setType(TYPE);
+    }
+
+    public boolean isDisplaySchema()
+    {
+        return displaySchema;
+    }
+
+    public GraphqlApiResourceReference setDisplaySchema(boolean displaySchema)
+    {
+        this.displaySchema = displaySchema;
+        return this;
     }
 }

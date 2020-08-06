@@ -36,7 +36,7 @@ public interface Graphql
     /**
      * @return
      */
-    GraphQLSchema getSchema();
+    String printSchema() throws IOException;
 
     /**
      * @param jsonInput

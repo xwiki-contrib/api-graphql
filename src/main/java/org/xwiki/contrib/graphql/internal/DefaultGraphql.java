@@ -36,6 +36,7 @@ import graphql.schema.GraphQLSchema;
 import io.smallrye.graphql.bootstrap.Bootstrap;
 import io.smallrye.graphql.bootstrap.Config;
 import io.smallrye.graphql.execution.ExecutionService;
+import io.smallrye.graphql.execution.SchemaPrinter;
 import io.smallrye.graphql.schema.SchemaBuilder;
 import io.smallrye.graphql.schema.model.Schema;
 
@@ -50,20 +51,16 @@ public class DefaultGraphql implements Graphql
     @Inject
     private Logger logger;
 
-    @Override
-    public GraphQLSchema getSchema()
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public JsonObject execute(JsonObject jsonInput) throws IOException
+    private Config getConfiguration()
     {
         Config config = new Config()
         {
         };
+        return config;
+    }
 
+    private GraphQLSchema getSchema() throws IOException
+    {
         // Classes in this artifact
         Indexer indexer = new Indexer();
         InputStream stream =
@@ -73,12 +70,24 @@ public class DefaultGraphql implements Graphql
 
         Schema schema = SchemaBuilder.build(index); // Get the smallrye schema
 
-        GraphQLSchema graphQLSchema = Bootstrap.bootstrap(schema, config);
+        return Bootstrap.bootstrap(schema, getConfiguration());
+    }
+
+    @Override
+    public String printSchema() throws IOException
+    {
+        SchemaPrinter schemaPrinter = new SchemaPrinter(getConfiguration());
+        return schemaPrinter.print(getSchema());
+    }
+
+    @Override
+    public JsonObject execute(JsonObject jsonInput) throws IOException
+    {
         // if (config.isMetricsEnabled()) {
         // MetricRegistry vendorRegistry = MetricsService.load().getMetricRegistry(MetricRegistry.Type.VENDOR);
         // Bootstrap.registerMetrics(schema, vendorRegistry);
         // }
-        ExecutionService executionService = new ExecutionService(config, graphQLSchema);
+        ExecutionService executionService = new ExecutionService(getConfiguration(), getSchema());
 
         return executionService.execute(jsonInput);
     }
