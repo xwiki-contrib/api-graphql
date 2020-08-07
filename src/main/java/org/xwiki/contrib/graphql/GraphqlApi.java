@@ -21,7 +21,9 @@ package org.xwiki.contrib.graphql;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.eclipse.microprofile.graphql.DefaultValue;
@@ -31,11 +33,13 @@ import org.eclipse.microprofile.graphql.Mutation;
 import org.eclipse.microprofile.graphql.Name;
 import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Query;
+import org.eclipse.microprofile.graphql.Source;
 import org.xwiki.bridge.DocumentAccessBridge;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.query.QueryManager;
 
 import com.xpn.xwiki.api.Document;
+import com.xpn.xwiki.api.Object;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.web.Utils;
 
@@ -138,5 +142,19 @@ public class GraphqlApi
         document.delete();
 
         return document;
+    }
+
+    @Named("objects")
+    public List<Object> getObjects(@Source Document document)
+    {
+        List<Object> result = new ArrayList<>();
+        for (Vector<Object> objects : document.getxWikiObjects().values()) {
+            result.addAll(objects);
+        }
+
+        result.sort((Object o1, Object o2) -> o1.getxWikiClass().getDocumentReference()
+            .compareTo(o2.getxWikiClass().getDocumentReference()));
+
+        return result;
     }
 }
