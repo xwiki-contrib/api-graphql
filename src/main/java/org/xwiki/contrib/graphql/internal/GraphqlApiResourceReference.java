@@ -26,6 +26,7 @@ import org.xwiki.resource.ResourceType;
  * Resource reference for the GraphQL endpoint.
  *
  * @version $Id$
+ * @since 1.0
  */
 public class GraphqlApiResourceReference extends AbstractResourceReference
 {

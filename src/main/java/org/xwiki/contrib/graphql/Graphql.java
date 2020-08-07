@@ -29,6 +29,7 @@ import org.xwiki.component.annotation.Role;
  * Component in charge of initializing and executing GraphQL queries
  *
  * @version $Id$
+ * @since 1.0
  */
 @Role
 public interface Graphql

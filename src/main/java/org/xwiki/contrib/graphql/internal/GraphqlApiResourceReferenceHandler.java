@@ -54,6 +54,8 @@ import org.xwiki.resource.ResourceReferenceHandlerChain;
 import org.xwiki.resource.ResourceReferenceHandlerException;
 import org.xwiki.resource.ResourceType;
 
+import com.xpn.xwiki.web.Utils;
+
 /**
  * XWiki GraphQL endpoint. Most of this code inspired by smallrye-graphql-servlet implementation.
  *
@@ -91,6 +93,10 @@ public class GraphqlApiResourceReferenceHandler extends AbstractResourceReferenc
     public void handle(ResourceReference reference, ResourceReferenceHandlerChain chain)
         throws ResourceReferenceHandlerException
     {
+        // FIXME: Remove this ugly hack when we figure out how to authenticate users to the API.
+        // Note: basicauth does not seem to be working.
+        Utils.getContext().setUser("XWiki.Admin");
+
         GraphqlApiResourceReference graphqlApiResourceReference = (GraphqlApiResourceReference) reference;
         HttpServletRequest request = ((ServletRequest) this.container.getRequest()).getHttpServletRequest();
         HttpServletResponse response = ((ServletResponse) this.container.getResponse()).getHttpServletResponse();

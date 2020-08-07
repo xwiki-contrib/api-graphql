@@ -29,7 +29,7 @@
   </parent>
   <groupId>org.xwiki.contrib.graphql</groupId>
   <artifactId>api-graphql</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.17-SNAPSHOT</version>
 
   <name>XWiki GraphQL API</name>
   <description>GraphQL API to expose the XWiki model for usecases where REST is too verbose or produces too much back and forward between the client and the server.</description>
@@ -39,10 +39,14 @@
       <id>Enygma2002</id>
       <name>Eduard Moraru</name>
     </developer>
+    <developer>
+      <id>surli</id>
+      <name>Simon Urli</name>
+    </developer>
   </developers>
 
   <properties>
-    <smallrye-graphql.version>1.0.6</smallrye-graphql.version>
+    <smallrye-graphql.version>1.0.7</smallrye-graphql.version>
     <!-- The server should only be installed at farm level so it can handle the URLs -->
     <xwiki.extension.namespaces>{root}</xwiki.extension.namespaces>
     <xwiki.checkstyle.skip>true</xwiki.checkstyle.skip>
@@ -50,6 +54,22 @@
 
 
   <dependencies>
+    <dependency>
+      <groupId>org.xwiki.commons</groupId>
+      <artifactId>xwiki-commons-component-default</artifactId>
+      <version>${commons.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-platform-oldcore</artifactId>
+      <version>${platform.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-platform-query-manager</artifactId>
+      <version>${platform.version}</version>
+    </dependency>
+
     <!-- GraphQL -->
     <dependency>
       <groupId>io.smallrye</groupId>
@@ -65,23 +85,11 @@
         </exclusion>
       </exclusions>
     </dependency>
-    
     <dependency>
       <groupId>io.smallrye</groupId>
       <artifactId>smallrye-graphql-schema-builder</artifactId>
       <version>${smallrye-graphql.version}</version>
     </dependency>
-    
-<!--     <dependency> -->
-<!--       <groupId>io.smallrye</groupId> -->
-<!--       <artifactId>smallrye-graphql-cdi</artifactId> -->
-<!--       <version>${smallrye-graphql.version}</version> -->
-<!--     </dependency> -->
-<!--         <dependency> -->
-<!--             <groupId>jakarta.enterprise</groupId> -->
-<!--             <artifactId>jakarta.enterprise.cdi-api</artifactId> -->
-<!--             <version>2.0.2</version> -->
-<!--         </dependency> -->
 
     <dependency>
       <groupId>org.xwiki.platform</groupId>
@@ -92,38 +100,28 @@
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
     </dependency>
+
     <dependency>
       <groupId>jakarta.json</groupId>
       <artifactId>jakarta.json-api</artifactId>
       <version>1.1.6</version>
     </dependency>
     <dependency>
-      <groupId>jakarta.json.bind</groupId>
-      <artifactId>jakarta.json.bind-api</artifactId>
-      <version>1.0.2</version>
-    </dependency>
-    <dependency>
       <groupId>org.glassfish</groupId>
       <artifactId>jakarta.json</artifactId>
       <version>1.1.6</version>
+    </dependency>
+
+    <dependency>
+      <groupId>jakarta.json.bind</groupId>
+      <artifactId>jakarta.json.bind-api</artifactId>
+      <version>1.0.2</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse</groupId>
       <artifactId>yasson</artifactId>
       <version>1.0.7</version>
     </dependency>
-
-    <dependency>
-      <groupId>org.xwiki.commons</groupId>
-      <artifactId>xwiki-commons-component-default</artifactId>
-      <version>${commons.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-platform-oldcore</artifactId>
-      <version>${platform.version}</version>
-    </dependency>
-
   </dependencies>
 
 </project>

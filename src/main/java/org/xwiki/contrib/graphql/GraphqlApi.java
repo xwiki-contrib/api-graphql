@@ -19,14 +19,21 @@
  */
 package org.xwiki.contrib.graphql;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.inject.Singleton;
 
+import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Description;
 import org.eclipse.microprofile.graphql.GraphQLApi;
+import org.eclipse.microprofile.graphql.Mutation;
 import org.eclipse.microprofile.graphql.Name;
+import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Query;
 import org.xwiki.bridge.DocumentAccessBridge;
 import org.xwiki.component.annotation.Component;
+import org.xwiki.query.QueryManager;
 
 import com.xpn.xwiki.api.Document;
 import com.xpn.xwiki.doc.XWikiDocument;
@@ -36,22 +43,100 @@ import com.xpn.xwiki.web.Utils;
  * The entry-point for the operations provided by the XWiki GraphQL API.
  *
  * @version $Id$
+ * @since 1.0
  */
 @GraphQLApi
 @Component(roles = GraphqlApi.class)
 @Singleton
 public class GraphqlApi
 {
-    /**
-     * @param documentReference the reference
-     * @return the document
-     */
     @Query
     @Description("Get a document by reference")
     public Document getDocument(@Name("documentReference") String documentReference) throws Exception
     {
-        // Ugly hack but inject doesn't seem to work.
+        // Ugly hack but @Inject doesn't seem to work to access XWiki components.
         DocumentAccessBridge documentAccessBridge = Utils.getComponent(DocumentAccessBridge.class);
-        return new Document((XWikiDocument) documentAccessBridge.getDocument(documentReference), Utils.getContext());
+        Document document =
+            new Document((XWikiDocument) documentAccessBridge.getDocument(documentReference), Utils.getContext());
+
+        if (document.isNew()) {
+            return null;
+        }
+
+        if (!document.hasAccessLevel("view")) {
+            throw new Exception(String.format("Current user [%s] lacks [%s] right on [%s]",
+                documentAccessBridge.getCurrentUserReference(), "view", documentReference));
+        }
+
+        return document;
+    }
+
+    @Query
+    @Description("Get documents by query")
+    public List<Document> getDocuments(@DefaultValue(org.xwiki.query.Query.XWQL) String language,
+        @DefaultValue("") String statement, @DefaultValue("xwiki") String wikiId, @DefaultValue("0") int offset,
+        @DefaultValue("10") int limit) throws Exception
+    {
+        DocumentAccessBridge documentAccessBridge = Utils.getComponent(DocumentAccessBridge.class);
+
+        List<Document> result = new ArrayList<>();
+
+        QueryManager queryManager = Utils.getComponent(QueryManager.class);
+        List<String> fullNames =
+            queryManager.createQuery(statement, language).setWiki(wikiId).setOffset(offset).setLimit(limit).execute();
+        for (String documentFullName : fullNames) {
+
+            Document document =
+                new Document((XWikiDocument) documentAccessBridge.getDocument(documentFullName), Utils.getContext());
+
+            if (!document.hasAccessLevel("view")) {
+                continue;
+            }
+
+            result.add(document);
+        }
+
+        return result;
+    }
+
+    @Mutation
+    @Description("Create or update a document by reference")
+    public Document createOrUpdateDocument(@NonNull String documentReference, String title, String content,
+        String comment, @DefaultValue("false") boolean isMinor) throws Exception
+    {
+        DocumentAccessBridge documentAccessBridge = Utils.getComponent(DocumentAccessBridge.class);
+        Document document =
+            new Document((XWikiDocument) documentAccessBridge.getDocument(documentReference), Utils.getContext());
+
+        if (!document.hasAccessLevel("edit")) {
+            throw new Exception(String.format("Current user [%s] lacks [%s] right on [%s]",
+                documentAccessBridge.getCurrentUserReference(), "edit", documentReference));
+        }
+
+        document.setTitle(title);
+        document.setContent(content);
+        document.setComment(comment);
+        document.setMinorEdit(isMinor);
+
+        document.save(comment);
+
+        return document;
+    }
+
+    @Mutation
+    @Description("Delete a document by reference")
+    public Document deleteDocument(String documentReference) throws Exception
+    {
+        DocumentAccessBridge documentAccessBridge = Utils.getComponent(DocumentAccessBridge.class);
+        Document document =
+            new Document((XWikiDocument) documentAccessBridge.getDocument(documentReference), Utils.getContext());
+
+        if (document.isNew()) {
+            return null;
+        }
+
+        document.delete();
+
+        return document;
     }
 }

@@ -33,7 +33,10 @@ import org.xwiki.url.ExtendedURL;
 import org.xwiki.url.internal.AbstractResourceReferenceResolver;
 
 /**
- * A dumb resolver to resolve graphql references.
+ * Resolves GraphQL references.
+ *
+ * @version $Id$
+ * @since 1.0
  */
 @Component
 @Named("graphql")
@@ -48,7 +51,7 @@ public class GraphqlApiResourceReferenceResolver extends AbstractResourceReferen
 
         // Mark it as a schema request
         List<String> segments = representation.getSegments();
-        if (!segments.isEmpty() && "graphql.schema".equals(segments.get(0))) {
+        if (!segments.isEmpty() && "schema.graphql".equals(segments.get(0))) {
             resourceReference.setDisplaySchema(true);
         }
 
