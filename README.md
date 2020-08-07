@@ -10,5 +10,5 @@ curl -X POST -H "Content-Type: application/json" -d '{"query": "{ document(docum
 
 You can also check the whole schema by going on:
 ```
-http://localhost:8080/xwiki/graphql/graphql.schema
+http://localhost:8080/xwiki/graphql/schema.graphql
 ```
