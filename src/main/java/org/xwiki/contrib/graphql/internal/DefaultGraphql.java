@@ -42,7 +42,7 @@ import io.smallrye.graphql.schema.model.Schema;
  * Default implementation for {@link Graphql}.
  *
  * @version $Id$
- * @since 1.0
+ * @since 0.1
  */
 @Component
 @Singleton

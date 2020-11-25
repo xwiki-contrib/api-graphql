@@ -26,7 +26,7 @@ import org.xwiki.resource.ResourceType;
  * Resource reference for the GraphQL endpoint.
  *
  * @version $Id$
- * @since 1.0
+ * @since 0.1
  */
 public class GraphqlApiResourceReference extends AbstractResourceReference
 {
@@ -37,19 +37,26 @@ public class GraphqlApiResourceReference extends AbstractResourceReference
 
     private boolean displaySchema;
 
+    /**
+     * Default constructor.
+     */
     public GraphqlApiResourceReference()
     {
         setType(TYPE);
     }
 
     /**
-     * @return true if this is a schema request and not an actual query
+     * @return {@code true} if this is a schema request and not an actual query
      */
     public boolean isDisplaySchema()
     {
         return displaySchema;
     }
 
+    /**
+     * @param displaySchema {@code true} if this is a schema request and not an actual query
+     * @return {@code this} instance, to allow chaining
+     */
     public GraphqlApiResourceReference setDisplaySchema(boolean displaySchema)
     {
         this.displaySchema = displaySchema;

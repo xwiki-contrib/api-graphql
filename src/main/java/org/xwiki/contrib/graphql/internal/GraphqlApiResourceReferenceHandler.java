@@ -25,6 +25,7 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
@@ -60,7 +61,7 @@ import com.xpn.xwiki.web.Utils;
  * XWiki GraphQL endpoint. Most of this code inspired by smallrye-graphql-servlet implementation.
  *
  * @version $Id$
- * @since 1.0
+ * @since 0.1
  */
 @Singleton
 @Component
@@ -73,9 +74,9 @@ public class GraphqlApiResourceReferenceHandler extends AbstractResourceReferenc
 
     private static final String VARIABLES = "variables";
 
-    private static final JsonReaderFactory jsonReaderFactory = Json.createReaderFactory(null);
+    private static final JsonReaderFactory JSON_READER_FACTORY = Json.createReaderFactory(null);
 
-    private static final JsonWriterFactory jsonWriterFactory = Json.createWriterFactory(null);
+    private static final JsonWriterFactory JSON_WRITER_FACTORY = Json.createWriterFactory(null);
 
     @Inject
     private Container container;
@@ -146,9 +147,9 @@ public class GraphqlApiResourceReferenceHandler extends AbstractResourceReferenc
         }
 
         JsonObjectBuilder input = Json.createObjectBuilder();
-        input.add(QUERY, URLDecoder.decode(query, "UTF8"));
+        input.add(QUERY, URLDecoder.decode(query, StandardCharsets.UTF_8.name()));
         if (StringUtils.isNotBlank(variables)) {
-            JsonObject jsonObject = toJsonObject(URLDecoder.decode(variables, "UTF8"));
+            JsonObject jsonObject = toJsonObject(URLDecoder.decode(variables, StandardCharsets.UTF_8.name()));
             input.add(VARIABLES, jsonObject);
         }
         handleInput(input.build(), response);
@@ -163,7 +164,7 @@ public class GraphqlApiResourceReferenceHandler extends AbstractResourceReferenc
 
     private void handleInput(Reader inputReader, HttpServletResponse response) throws IOException
     {
-        try (JsonReader jsonReader = jsonReaderFactory.createReader(inputReader)) {
+        try (JsonReader jsonReader = JSON_READER_FACTORY.createReader(inputReader)) {
             JsonObject jsonInput = jsonReader.readObject();
             handleInput(jsonInput, response);
         }
@@ -176,7 +177,7 @@ public class GraphqlApiResourceReferenceHandler extends AbstractResourceReferenc
             ServletOutputStream out = response.getOutputStream();
             response.setContentType(APPLICATION_JSON_UTF8);
 
-            try (JsonWriter jsonWriter = jsonWriterFactory.createWriter(out)) {
+            try (JsonWriter jsonWriter = JSON_WRITER_FACTORY.createWriter(out)) {
                 jsonWriter.writeObject(outputJson);
                 out.flush();
             }

@@ -29,7 +29,7 @@
   </parent>
   <groupId>org.xwiki.contrib.graphql</groupId>
   <artifactId>api-graphql</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>0.1-SNAPSHOT</version>
 
   <name>XWiki GraphQL API</name>
   <description>GraphQL API to expose the XWiki model for usecases where REST is too verbose or produces too much back and forward between the client and the server.</description>

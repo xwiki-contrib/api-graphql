@@ -1,4 +1,3 @@
-org.xwiki.contrib.graphql.GraphqlApi
 org.xwiki.contrib.graphql.internal.DefaultGraphql
 org.xwiki.contrib.graphql.internal.GraphqlApiResourceReferenceHandler
 org.xwiki.contrib.graphql.internal.GraphqlApiResourceReferenceResolver

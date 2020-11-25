@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.inject.Named;
-import javax.inject.Singleton;
 
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Description;
@@ -35,8 +34,8 @@ import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Query;
 import org.eclipse.microprofile.graphql.Source;
 import org.xwiki.bridge.DocumentAccessBridge;
-import org.xwiki.component.annotation.Component;
 import org.xwiki.query.QueryManager;
+import org.xwiki.security.authorization.Right;
 
 import com.xpn.xwiki.api.Document;
 import com.xpn.xwiki.api.Object;
@@ -45,20 +44,27 @@ import com.xpn.xwiki.web.Utils;
 
 /**
  * The entry-point for the operations provided by the XWiki GraphQL API.
+ * <p/>
+ * The lifecycle of this class is handled by GraphQL (with reflections) and not XWiki's Component Manager.
  *
  * @version $Id$
- * @since 1.0
+ * @since 0.1
  */
 @GraphQLApi
-@Component(roles = GraphqlApi.class)
-@Singleton
 public class GraphqlApi
 {
+    private static final String USER_LACKS_RIGHTS_TEMPLATE = "Current user [%s] lacks [%s] right on [%s]";
+
+    /**
+     * @param documentReference the reference of the document to get
+     * @return the document
+     * @throws Exception in case of problems
+     */
     @Query
     @Description("Get a document by reference")
     public Document getDocument(@Name("documentReference") String documentReference) throws Exception
     {
-        // Ugly hack but @Inject doesn't seem to work to access XWiki components.
+        // Not nice, but we are forced to use static access if want to reach XWiki components.
         DocumentAccessBridge documentAccessBridge = Utils.getComponent(DocumentAccessBridge.class);
         Document document =
             new Document((XWikiDocument) documentAccessBridge.getDocument(documentReference), Utils.getContext());
@@ -67,14 +73,23 @@ public class GraphqlApi
             return null;
         }
 
-        if (!document.hasAccessLevel("view")) {
-            throw new Exception(String.format("Current user [%s] lacks [%s] right on [%s]",
-                documentAccessBridge.getCurrentUserReference(), "view", documentReference));
+        if (!document.hasAccessLevel(Right.VIEW.getName())) {
+            throw new Exception(String.format(USER_LACKS_RIGHTS_TEMPLATE,
+                documentAccessBridge.getCurrentUserReference(), Right.VIEW.getName(), documentReference));
         }
 
         return document;
     }
 
+    /**
+     * @param language the language of the query
+     * @param statement the statement of the query
+     * @param wikiId the id of the wiki where to execute the query
+     * @param offset start offset
+     * @param limit the number of results
+     * @return the list of documents selected by the given query
+     * @throws Exception
+     */
     @Query
     @Description("Get documents by query")
     public List<Document> getDocuments(@DefaultValue(org.xwiki.query.Query.XWQL) String language,
@@ -103,6 +118,15 @@ public class GraphqlApi
         return result;
     }
 
+    /**
+     * @param documentReference the reference of the document to create or update
+     * @param title the new title of the document
+     * @param content the new content
+     * @param comment the comment that will describe this change
+     * @param isMinor if the change is a minor one
+     * @return the created or updated document, after it was saved
+     * @throws Exception in case of problems
+     */
     @Mutation
     @Description("Create or update a document by reference")
     public Document createOrUpdateDocument(@NonNull String documentReference, String title, String content,
@@ -112,9 +136,9 @@ public class GraphqlApi
         Document document =
             new Document((XWikiDocument) documentAccessBridge.getDocument(documentReference), Utils.getContext());
 
-        if (!document.hasAccessLevel("edit")) {
-            throw new Exception(String.format("Current user [%s] lacks [%s] right on [%s]",
-                documentAccessBridge.getCurrentUserReference(), "edit", documentReference));
+        if (!document.hasAccessLevel(Right.EDIT.getName())) {
+            throw new Exception(String.format(USER_LACKS_RIGHTS_TEMPLATE,
+                documentAccessBridge.getCurrentUserReference(), Right.EDIT.getName(), documentReference));
         }
 
         document.setTitle(title);
@@ -127,6 +151,11 @@ public class GraphqlApi
         return document;
     }
 
+    /**
+     * @param documentReference the reference of the document to delete
+     * @return the deleted document, after it was deleted from storage
+     * @throws Exception in case of problems
+     */
     @Mutation
     @Description("Delete a document by reference")
     public Document deleteDocument(String documentReference) throws Exception
@@ -144,6 +173,10 @@ public class GraphqlApi
         return document;
     }
 
+    /**
+     * @param document the document for which to retrieve objects
+     * @return the list of objects of the document
+     */
     @Named("objects")
     public List<Object> getObjects(@Source Document document)
     {

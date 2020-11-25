@@ -26,10 +26,10 @@ import javax.json.JsonObject;
 import org.xwiki.component.annotation.Role;
 
 /**
- * Component in charge of initializing and executing GraphQL queries
+ * Component in charge of initializing and executing GraphQL queries.
  *
  * @version $Id$
- * @since 1.0
+ * @since 0.1
  */
 @Role
 public interface Graphql

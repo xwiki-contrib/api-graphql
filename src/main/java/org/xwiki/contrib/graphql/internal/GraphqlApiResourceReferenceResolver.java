@@ -36,7 +36,7 @@ import org.xwiki.url.internal.AbstractResourceReferenceResolver;
  * Resolves GraphQL references.
  *
  * @version $Id$
- * @since 1.0
+ * @since 0.1
  */
 @Component
 @Named("graphql")
