@@ -36,6 +36,7 @@ public interface Graphql
 {
     /**
      * @return the schema describing the GraphQL API
+     * @throws IOException in case of problems
      */
     String printSchema() throws IOException;
 

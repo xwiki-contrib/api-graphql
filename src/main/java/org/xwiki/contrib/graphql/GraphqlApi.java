@@ -44,7 +44,7 @@ import com.xpn.xwiki.web.Utils;
 
 /**
  * The entry-point for the operations provided by the XWiki GraphQL API.
- * <p/>
+ * <p>
  * The lifecycle of this class is handled by GraphQL (with reflections) and not XWiki's Component Manager.
  *
  * @version $Id$
@@ -88,7 +88,7 @@ public class GraphqlApi
      * @param offset start offset
      * @param limit the number of results
      * @return the list of documents selected by the given query
-     * @throws Exception
+     * @throws Exception in case of problems
      */
     @Query
     @Description("Get documents by query")
