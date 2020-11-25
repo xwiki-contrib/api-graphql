@@ -27,7 +27,6 @@
     <artifactId>parent-platform</artifactId>
     <version>12.4</version>
   </parent>
-  <groupId>org.xwiki.contrib.graphql</groupId>
   <artifactId>api-graphql</artifactId>
   <version>0.1-SNAPSHOT</version>
 
@@ -45,13 +44,25 @@
     </developer>
   </developers>
 
+  <scm>
+    <connection>scm:git:git://github.com/xwiki-contrib/api-graphql.git</connection>
+    <developerConnection>scm:git:git@github.com:xwiki-contrib/api-graphql.git</developerConnection>
+    <url>https://github.com/xwiki-contrib/api-graphql/tree/master</url>
+  </scm>
+
   <properties>
     <smallrye-graphql.version>1.0.7</smallrye-graphql.version>
-    <!-- The server should only be installed at farm level so it can handle the URLs -->
-    <xwiki.extension.namespaces>{root}</xwiki.extension.namespaces>
-    <xwiki.checkstyle.skip>true</xwiki.checkstyle.skip>
-  </properties>
 
+    <!-- The server should only be installed at farm level so it can handle the URLs. -->
+    <xwiki.extension.namespaces>{root}</xwiki.extension.namespaces>
+
+    <!-- ClassFanOutComplexity issue in GraphqlApiResourceReferenceHandler. -->
+    <xwiki.checkstyle.skip>true</xwiki.checkstyle.skip>
+
+    <!-- Jira auto-release setup. -->
+    <xwiki.release.jira.skip>false</xwiki.release.jira.skip>
+    <xwiki.issueManagement.jira.id>GQL</xwiki.issueManagement.jira.id>
+  </properties>
 
   <dependencies>
     <dependency>
