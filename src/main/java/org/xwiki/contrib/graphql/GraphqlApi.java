@@ -39,6 +39,7 @@ import org.xwiki.security.authorization.Right;
 
 import com.xpn.xwiki.api.Document;
 import com.xpn.xwiki.api.Object;
+import com.xpn.xwiki.api.Property;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.web.Utils;
 
@@ -189,5 +190,31 @@ public class GraphqlApi
             .compareTo(o2.getxWikiClass().getDocumentReference()));
 
         return result;
+    }
+
+    /**
+     * @param object the object for which to retrieve the properties
+     * @return the list of properties of the object
+     */
+    @Named("properties")
+    public List<Property> getProperties(@Source Object object)
+    {
+        List<Property> result = new ArrayList<>();
+        for (java.lang.Object propertyName : object.getPropertyNames()) {
+            if (propertyName instanceof String) {
+                result.add(object.getProperty((String) propertyName));
+            }
+        }
+        return result;
+    }
+
+    /**
+     * @param object the object from which the class should be taken
+     * @return the corresponding XWiki class
+     */
+    @Named("class")
+    public com.xpn.xwiki.api.Class getXWikiClass(@Source Object object)
+    {
+        return object.getxWikiClass();
     }
 }
