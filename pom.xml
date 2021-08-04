@@ -168,6 +168,13 @@
                     "new": "method com.xpn.xwiki.api.Document org.xwiki.contrib.graphql.GraphqlApi::getDocument(java.lang.String) throws org.xwiki.security.authorization.AuthorizationException, java.lang.Exception",
                     "exception": "org.xwiki.security.authorization.AuthorizationException",
                     "justification": "Young API: Clearer exceptions"
+                  },
+                  {
+                    "code": "java.annotation.added",
+                    "old": "parameter com.xpn.xwiki.api.Document org.xwiki.contrib.graphql.GraphqlApi::createOrUpdateDocument(===java.lang.String===, java.lang.String, java.lang.String, java.lang.String, boolean) throws java.lang.Exception",
+                    "new": "parameter com.xpn.xwiki.api.Document org.xwiki.contrib.graphql.GraphqlApi::createOrUpdateDocument(===java.lang.String===, java.lang.String, java.lang.String, java.lang.String, boolean) throws org.xwiki.security.authorization.AuthorizationException, java.lang.Exception",
+                    "annotation": "@org.eclipse.microprofile.graphql.NonNull",
+                    "justification": "Young API: Clearer exceptions"
                   }
                 ]
               }
