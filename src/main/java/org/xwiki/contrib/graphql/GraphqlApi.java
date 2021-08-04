@@ -35,6 +35,7 @@ import org.eclipse.microprofile.graphql.Query;
 import org.eclipse.microprofile.graphql.Source;
 import org.xwiki.bridge.DocumentAccessBridge;
 import org.xwiki.query.QueryManager;
+import org.xwiki.security.authorization.AuthorizationException;
 import org.xwiki.security.authorization.Right;
 
 import com.xpn.xwiki.api.Document;
@@ -58,26 +59,35 @@ public class GraphqlApi
     /**
      * @param documentReference the reference of the document to get
      * @return the document
+     * @throws AuthorizationException if the current user is missing the needed rights
      * @throws Exception in case of problems
      */
     @Query
     @Description("Get a document by reference")
-    public Document getDocument(@Name("documentReference") String documentReference) throws Exception
+    public Document getDocument(@Name("documentReference") String documentReference)
+        throws AuthorizationException, Exception
     {
         // Not nice, but we are forced to use static access if want to reach XWiki components.
-        DocumentAccessBridge documentAccessBridge = Utils.getComponent(DocumentAccessBridge.class);
-        Document document =
-            new Document((XWikiDocument) documentAccessBridge.getDocument(documentReference), Utils.getContext());
+        Document document = getDocumentCheckingRights(documentReference, Right.VIEW);
 
         if (document.isNew()) {
             return null;
         }
 
-        if (!document.hasAccessLevel(Right.VIEW.getName())) {
-            throw new Exception(String.format(USER_LACKS_RIGHTS_TEMPLATE,
-                documentAccessBridge.getCurrentUserReference(), Right.VIEW.getName(), documentReference));
-        }
+        return document;
+    }
 
+    private Document getDocumentCheckingRights(String documentReference, Right right)
+        throws Exception, AuthorizationException
+    {
+        DocumentAccessBridge documentAccessBridge = Utils.getComponent(DocumentAccessBridge.class);
+        Document document =
+            new Document((XWikiDocument) documentAccessBridge.getDocument(documentReference), Utils.getContext());
+
+        if (!document.hasAccessLevel(right.getName())) {
+            throw new AuthorizationException(String.format(USER_LACKS_RIGHTS_TEMPLATE,
+                documentAccessBridge.getCurrentUserReference(), right.getName(), documentReference));
+        }
         return document;
     }
 
@@ -96,8 +106,6 @@ public class GraphqlApi
         @DefaultValue("") String statement, @DefaultValue("xwiki") String wikiId, @DefaultValue("0") int offset,
         @DefaultValue("10") int limit) throws Exception
     {
-        DocumentAccessBridge documentAccessBridge = Utils.getComponent(DocumentAccessBridge.class);
-
         List<Document> result = new ArrayList<>();
 
         QueryManager queryManager = Utils.getComponent(QueryManager.class);
@@ -105,10 +113,10 @@ public class GraphqlApi
             queryManager.createQuery(statement, language).setWiki(wikiId).setOffset(offset).setLimit(limit).execute();
         for (String documentFullName : fullNames) {
 
-            Document document =
-                new Document((XWikiDocument) documentAccessBridge.getDocument(documentFullName), Utils.getContext());
-
-            if (!document.hasAccessLevel("view")) {
+            Document document = null;
+            try {
+                document = getDocumentCheckingRights(documentFullName, Right.VIEW);
+            } catch (AuthorizationException e) {
                 continue;
             }
 
@@ -125,21 +133,15 @@ public class GraphqlApi
      * @param comment the comment that will describe this change
      * @param isMinor if the change is a minor one
      * @return the created or updated document, after it was saved
+     * @throws AuthorizationException if the current user is missing the needed rights
      * @throws Exception in case of problems
      */
     @Mutation
     @Description("Create or update a document by reference")
     public Document createOrUpdateDocument(@NonNull String documentReference, String title, String content,
-        String comment, @DefaultValue("false") boolean isMinor) throws Exception
+        String comment, @DefaultValue("false") boolean isMinor) throws AuthorizationException, Exception
     {
-        DocumentAccessBridge documentAccessBridge = Utils.getComponent(DocumentAccessBridge.class);
-        Document document =
-            new Document((XWikiDocument) documentAccessBridge.getDocument(documentReference), Utils.getContext());
-
-        if (!document.hasAccessLevel(Right.EDIT.getName())) {
-            throw new Exception(String.format(USER_LACKS_RIGHTS_TEMPLATE,
-                documentAccessBridge.getCurrentUserReference(), Right.EDIT.getName(), documentReference));
-        }
+        Document document = getDocumentCheckingRights(documentReference, Right.EDIT);
 
         document.setTitle(title);
         document.setContent(content);
@@ -160,9 +162,7 @@ public class GraphqlApi
     @Description("Delete a document by reference")
     public Document deleteDocument(String documentReference) throws Exception
     {
-        DocumentAccessBridge documentAccessBridge = Utils.getComponent(DocumentAccessBridge.class);
-        Document document =
-            new Document((XWikiDocument) documentAccessBridge.getDocument(documentReference), Utils.getContext());
+        Document document = getDocumentCheckingRights(documentReference, Right.DELETE);
 
         if (document.isNew()) {
             return null;

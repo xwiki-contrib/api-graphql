@@ -134,4 +134,48 @@
     </dependency>
   </dependencies>
 
+  <build>
+    <plugins>
+      <!-- Revapi backwards compatibility configuration/exclusions. -->
+      <plugin>
+        <groupId>org.revapi</groupId>
+        <artifactId>revapi-maven-plugin</artifactId>
+        <configuration>
+          <analysisConfiguration><![CDATA[
+            {
+              "revapi": {
+                "filter": {
+                  // We're ignoring all API incompatibilities from XWiki dependencies (i.e. commons and rendering)
+                  // since they're already covered by their own builds and we release all of them together.
+                  "archives": {
+                    "exclude": ["org\\.xwiki\\.commons:.*:.*", "org\\.xwiki\\.rendering:.*:.*"]
+                  }
+                },
+                "ignore" : [
+                  // Add more ignores below...
+                  // Note: you can use regexes by using the syntax: { "regex": true, ... }
+                  // Don't forget to '\'-escape dots and other special characters in this case ;)
+                  {
+                    "code": "java.method.exception.checkedAdded",
+                    "old": "method com.xpn.xwiki.api.Document org.xwiki.contrib.graphql.GraphqlApi::createOrUpdateDocument(java.lang.String, java.lang.String, java.lang.String, java.lang.String, boolean) throws java.lang.Exception",
+                    "new": "method com.xpn.xwiki.api.Document org.xwiki.contrib.graphql.GraphqlApi::createOrUpdateDocument(java.lang.String, java.lang.String, java.lang.String, java.lang.String, boolean) throws org.xwiki.security.authorization.AuthorizationException, java.lang.Exception",
+                    "exception": "org.xwiki.security.authorization.AuthorizationException",
+                    "justification": "Young API: Clearer exceptions"
+                  },
+                  {
+                    "code": "java.method.exception.checkedAdded",
+                    "old": "method com.xpn.xwiki.api.Document org.xwiki.contrib.graphql.GraphqlApi::getDocument(java.lang.String) throws java.lang.Exception",
+                    "new": "method com.xpn.xwiki.api.Document org.xwiki.contrib.graphql.GraphqlApi::getDocument(java.lang.String) throws org.xwiki.security.authorization.AuthorizationException, java.lang.Exception",
+                    "exception": "org.xwiki.security.authorization.AuthorizationException",
+                    "justification": "Young API: Clearer exceptions"
+                  }
+                ]
+              }
+            }
+          ]]></analysisConfiguration>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>
