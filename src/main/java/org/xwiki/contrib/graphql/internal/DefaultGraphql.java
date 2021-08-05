@@ -21,12 +21,19 @@ package org.xwiki.contrib.graphql.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.json.JsonObject;
 
-import org.jboss.jandex.Index;
-import org.jboss.jandex.Indexer;
+import org.jboss.jandex.CompositeIndex;
+import org.jboss.jandex.IndexReader;
+import org.jboss.jandex.IndexView;
+import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.graphql.Graphql;
 
@@ -48,6 +55,11 @@ import io.smallrye.graphql.schema.model.Schema;
 @Singleton
 public class DefaultGraphql implements Graphql
 {
+    private static final String JANDEX_IDX = "META-INF/jandex.idx";
+
+    @Inject
+    private Logger logger;
+
     private class XWikiGraphqlConfig implements Config
     {
         // Use defaults.
@@ -62,7 +74,7 @@ public class DefaultGraphql implements Graphql
     private GraphQLSchema getSchema() throws IOException
     {
         // Read the classpath and index the classes providing domain and operations.
-        Index index = buildIndex();
+        IndexView index = buildIndex();
 
         // Read the indexed classes to build the smallrye schema.
         Schema schema = SchemaBuilder.build(index);
@@ -71,38 +83,29 @@ public class DefaultGraphql implements Graphql
         return Bootstrap.bootstrap(schema, getConfiguration());
     }
 
-    private Index buildIndex() throws IOException
+    private IndexView buildIndex() throws IOException
     {
-        Indexer indexer = new Indexer();
+        List<IndexView> indexes = new ArrayList<>();
 
-        // FIXME: Come up with a way to automatically discover from the classpath the domain that is used to build the
-        // schema. For now, we are adding them by hand.
+        // Add pre-built jandex indexes available on the classpath.
+        Enumeration<URL> urls = getClass().getClassLoader().getResources(JANDEX_IDX);
+        while (urls.hasMoreElements()) {
+            URL url = urls.nextElement();
 
-        InputStream stream =
-            getClass().getClassLoader().getResourceAsStream("org/xwiki/contrib/graphql/GraphqlApi.class");
-        indexer.index(stream);
+            logger.debug("Loading jandex index from [{}]", url);
 
-        // Model
+            try (InputStream indexStream = url.openStream()) {
+                IndexReader reader = new IndexReader(indexStream);
+                IndexView index = reader.read();
+                indexes.add(index);
+            } catch (Exception e) {
+                logger.warn("Failed to load jandex index from [{}]", url, e);
+            }
+        }
 
-        stream = getClass().getClassLoader().getResourceAsStream("com/xpn/xwiki/api/Document.class");
-        indexer.index(stream);
-
-        stream = getClass().getClassLoader().getResourceAsStream("com/xpn/xwiki/api/Attachment.class");
-        indexer.index(stream);
-
-        stream = getClass().getClassLoader().getResourceAsStream("com/xpn/xwiki/api/Object.class");
-        indexer.index(stream);
-
-        stream = getClass().getClassLoader().getResourceAsStream("com/xpn/xwiki/api/Property.class");
-        indexer.index(stream);
-
-        stream = getClass().getClassLoader().getResourceAsStream("com/xpn/xwiki/api/Class.class");
-        indexer.index(stream);
-
-        stream = getClass().getClassLoader().getResourceAsStream("com/xpn/xwiki/api/Collection.class");
-        indexer.index(stream);
-
-        return indexer.complete();
+        // Merge all the indexes into one, exposed as a CompositeIndex.
+        CompositeIndex result = CompositeIndex.create(indexes);
+        return result;
     }
 
     @Override

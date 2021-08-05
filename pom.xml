@@ -51,6 +51,7 @@
 
   <properties>
     <smallrye-graphql.version>1.0.7</smallrye-graphql.version>
+    <jandex.maven.plugin.version>1.1.0</jandex.maven.plugin.version>
 
     <!-- The server should only be installed at farm level so it can handle the URLs. -->
     <xwiki.extension.namespaces>{root}</xwiki.extension.namespaces>
@@ -182,6 +183,72 @@
           ]]></analysisConfiguration>
         </configuration>
       </plugin>
+
+      <!-- Unpack the oldcore API classes so that they will be part of the jandex index. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>unpack</id>
+            <!-- Jandex runs at 'process-classes', so we need to copy the jar before that. -->
+            <phase>process-resources</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.xwiki.platform</groupId>
+                  <artifactId>xwiki-platform-oldcore</artifactId>
+                  <includes>com/xpn/xwiki/api/*.class</includes>
+                  <outputDirectory>${project.build.directory}/classes</outputDirectory>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Index the target/classes folder containing the oldcore API classes and the current project's classes. -->
+      <plugin>
+        <groupId>org.jboss.jandex</groupId>
+        <artifactId>jandex-maven-plugin</artifactId>
+        <version>${jandex.maven.plugin.version}</version>
+        <executions>
+          <execution>
+            <id>make-index</id>
+            <goals>
+              <goal>jandex</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Clean the temporary oldcore API classes folder before packaging, since we don't want it part of the final jar. -->
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>clean-platform-classes</id>
+            <!-- Just before the package is built. -->
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>clean</goal>
+            </goals>
+            <configuration>
+              <filesets>
+                <fileset>
+                  <directory>${project.build.directory}/classes/com</directory>
+                </fileset>
+              </filesets>
+              <!-- Make sure not to delete target/classes by mistake, as it is the default. -->
+              <excludeDefaultDirectories>true</excludeDefaultDirectories>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
   </build>
 
